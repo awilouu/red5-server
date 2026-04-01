@@ -140,6 +140,36 @@ File metadata and object caching via `ICacheStore` interface:
 
 See `EHCACHE_TO_CAFFEINE_MIGRATION.md` for migration details.
 
+### Enhanced RTMP (E-RTMP v2)
+Full compliance with the Enhanced RTMP v2 spec (v2-2026-01-31-r2). Implementation in `io/src/main/java/org/red5/codec/`:
+
+**Video Codecs (FourCC-based):**
+- **AVC** (H.264) `avc1` - NALU-based, uses SI24 compositionTimeOffset in CodedFrames
+- **HEVC** (H.265) `hvc1` - NALU-based, uses SI24 compositionTimeOffset in CodedFrames
+- **VVC** (H.266) `vvc1` - NALU-based, uses SI24 compositionTimeOffset in CodedFrames
+- **AV1** `av01` - OBU-based, does NOT use compositionTimeOffset (no SI24 in CodedFrames, CodedFramesX not applicable). Only codec supporting MPEG2TSSequenceStart.
+- **VP8** `vp08` - Does NOT use compositionTimeOffset
+- **VP9** `vp09` - Does NOT use compositionTimeOffset
+
+**Audio Codecs (via ExHeader codec ID 0x09):**
+- AAC `mp4a`, Opus `Opus`, AC-3 `ac-3`, E-AC-3 `ec-3`, FLAC `fLaC`, MP3 `.mp3`
+
+**Architecture:**
+- `AbstractVideo` - Base class handling enhanced bit detection, FourCC routing, ModEx unwrap, multitrack parsing, metadata frame AMF deserialization, command frames
+- `IEnhancedRTMPVideoCodec` - Interface for enhanced codec handlers (handleFrame, handleNonEnhanced, onVideoMetadata, onVideoCommand, onMultiTrackParsed)
+- `ExtendedAudio` - Audio ExHeader (0x09) codec with multitrack, multichannel config (Custom/Native channel orders), ModEx unwrap
+- Codec implementations (HEVCVideo, VVCVideo, AV1Video, AVCVideo, VP8Video, VP9Video) extend AbstractVideo and implement IEnhancedRTMPVideoCodec
+
+**Key enums and constants:**
+- `VideoPacketType` / `AudioPacketType` - Packet types including ModEx (0x07)
+- `VideoPacketModExType` / `AudioPacketModExType` - ModEx sub-types (TimestampOffsetNano)
+- `CapsExMask` - Capability flags: Reconnect, Multitrack, ModEx, TimestampNanoOffset
+- `FourCcInfoMask` - Codec capability flags: CanDecode, CanEncode, CanForward
+- `VideoFunctionFlag` - Client video capability flags: SEEK, HDR, METADATA, LARGE_SCALE_TILE
+- `AvMultitrackType` - OneTrack, ManyTracks, ManyTracksManyCodecs
+
+**Spec reference:** https://veovera.org/docs/enhanced/enhanced-rtmp-v2.html
+
 ### Security Considerations
 RTMP protocol security enhancements (see `SECURITY_FIXES_SUMMARY.md` for details):
 - **Chunk size validation** - Bounds checking (RTMP spec: 1-16777215, soft limits: 32-65536 bytes)
