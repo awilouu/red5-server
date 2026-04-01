@@ -171,7 +171,28 @@ public class VVCVideo extends AbstractVideo implements IEnhancedRTMPVideoCodec {
                         }
                         keyframes.add(new FrameData(data, compTimeOffset));
                         break;
+                    case INTERFRAME:
+                        if (bufferInterframes) {
+                            if (isDebug) {
+                                log.debug("Interframe - compTimeOffset: {}", compTimeOffset);
+                            }
+                            if (interframes == null) {
+                                interframes = new CopyOnWriteArrayList<>();
+                            }
+                            try {
+                                int lastInterframe = numInterframes.getAndIncrement();
+                                if (lastInterframe < interframes.size()) {
+                                    interframes.get(lastInterframe).setData(data);
+                                } else {
+                                    interframes.add(new FrameData(data));
+                                }
+                            } catch (Throwable e) {
+                                log.warn("Failed to buffer interframe", e);
+                            }
+                        }
+                        break;
                 }
+                break;
             default:
                 // not handled
                 break;
