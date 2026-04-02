@@ -4,6 +4,7 @@ target/
 .classpath
 .DS_Store
 .claude/
+*/superpowers/*
 
 *.zip
 *.tar.gz
