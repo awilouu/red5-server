@@ -308,10 +308,6 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         this.underrunTrigger = underrunTrigger;
     }
 
-    void setMessageOut(IMessageOutput msgOut) {
-        this.msgOutReference.set(msgOut);
-    }
-
     /**
      * Start stream
      */
@@ -1818,15 +1814,6 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
     }
 
     /**
-     * Returns true if the engine currently receives audio.
-     *
-     * @return receive audio
-     */
-    public boolean receiveAudio() {
-        return receiveAudio;
-    }
-
-    /**
      * Returns true if the engine currently receives audio and sets the new value.
      *
      * @param receive
@@ -1840,15 +1827,6 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             receiveAudio = receive;
         }
         return oldValue;
-    }
-
-    /**
-     * Returns true if the engine currently receives video.
-     *
-     * @return receive video
-     */
-    public boolean receiveVideo() {
-        return receiveVideo;
     }
 
     /**
