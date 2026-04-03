@@ -630,12 +630,12 @@ public class OBUParser {
         // Quantization params
         parseQuantizationParams(br, fh, seq);
         // Segmentation params
-        parseSegmentationParams(br, fh);
+        parseSegmentationParams(br, fh, seq);
         // Delta Q params
         parseDeltaQParams(br, fh);
         // Delta LF params
-        parseDeltaLfParams(br, fh);
-        boolean codedLossless = computeCodedLossless(fh);
+        parseDeltaLfParams(br, fh, seq);
+        boolean codedLossless = computeCodedLossless(fh, seq);
         fh.codedLossless = codedLossless;
         fh.allLossless = codedLossless && (fh.frameWidth == fh.upscaledWidth);
         // Loop filter params
@@ -901,9 +901,9 @@ public class OBUParser {
     /*
      * This method computes whether the frame is losslessly coded.
      */
-    private static boolean computeCodedLossless(OBPFrameHeader fh) {
+    private static boolean computeCodedLossless(OBPFrameHeader fh, OBPSequenceHeader seq) {
         for (int segmentId = 0; segmentId < 8; segmentId++) {
-            int qindex = getQIndex(true, segmentId, fh.quantizationParams.baseQIdx, fh);
+            int qindex = getQIndex(true, segmentId, fh.quantizationParams.baseQIdx, fh, seq);
             if (qindex != 0 || fh.quantizationParams.deltaQYDc != 0 || fh.quantizationParams.deltaQUAc != 0 || fh.quantizationParams.deltaQUDc != 0 || fh.quantizationParams.deltaQVAc != 0 || fh.quantizationParams.deltaQVDc != 0) {
                 return false;
             }
@@ -914,7 +914,7 @@ public class OBUParser {
     /*
      * This method computes the quantization index for a given segment.
      */
-    private static int getQIndex(boolean ignoreDeltaQ, int segmentId, int currentQIndex, OBPFrameHeader fh) {
+    private static int getQIndex(boolean ignoreDeltaQ, int segmentId, int currentQIndex, OBPFrameHeader fh, OBPSequenceHeader seq) {
         if (fh.segmentationParams.segmentationEnabled && fh.segmentationParams.featureEnabled[segmentId][0]) {
             int data = fh.segmentationParams.featureData[segmentId][0];
             int qindex = fh.quantizationParams.baseQIdx + data;
@@ -1799,7 +1799,7 @@ public class OBUParser {
         return t;
     }
 
-    private static void parseSegmentationParams(BitReader br, OBPFrameHeader fh) throws OBUParseException {
+    private static void parseSegmentationParams(BitReader br, OBPFrameHeader fh, OBPSequenceHeader seq) throws OBUParseException {
         fh.segmentationParams.segmentationEnabled = br.readBits(1) != 0;
         if (fh.segmentationParams.segmentationEnabled) {
             if (fh.primaryRefFrame == 7) {
@@ -1871,7 +1871,7 @@ public class OBUParser {
         }
     }
 
-    private static void parseDeltaLfParams(BitReader br, OBPFrameHeader fh) throws OBUParseException {
+    private static void parseDeltaLfParams(BitReader br, OBPFrameHeader fh, OBPSequenceHeader seq) throws OBUParseException {
         fh.deltaLfParams.deltaLfPresent = false;
         fh.deltaLfParams.deltaLfRes = 0;
         fh.deltaLfParams.deltaLfMulti = false;
