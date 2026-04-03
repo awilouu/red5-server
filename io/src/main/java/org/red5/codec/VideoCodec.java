@@ -162,17 +162,30 @@ public enum VideoCodec {
             return "av01"; // av1 / ffmpeg LE = 10va / 0x61763031
         }
 
-    }; // AV1 / av01
+    }, // AV1 / av01
+    VVC((byte) 0x0e) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new VVCVideo();
+        }
+
+        @Override
+        public String getMimeType() {
+            return "vvc1";
+        }
+
+    }; // VVC / vvc1 / h266
 
     /**
      * Codecs which have private / config data or frame type identifiers included.
      */
-    private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC); // leaving AV1 out since config isnt required
+    private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC, VVC); // leaving AV1 out since config isnt required
 
     /**
      * Codecs supplying composition time offset.
      */
-    private final static EnumSet<VideoCodec> compositionTime = EnumSet.of(AVC, HEVC, AV1);
+    private final static EnumSet<VideoCodec> compositionTime = EnumSet.of(AVC, HEVC, VVC);
 
     private final static Map<Byte, VideoCodec> map = new HashMap<>();
 

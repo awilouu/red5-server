@@ -1,9 +1,12 @@
 package org.red5.codec;
 
+import static org.junit.Assert.assertEquals;
+
+import java.nio.ByteOrder;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Test;
 import org.red5.io.utils.IOUtils;
-import java.nio.ByteOrder;
 
 public class FourCCTest {
 
@@ -29,6 +32,12 @@ public class FourCCTest {
             buffer.flip();
             System.out.println("fourcc bytes: " + buffer.getHexDump());
         }
+    }
+
+    @Test
+    public void testVVCFourCC() {
+        int fourcc = IOUtils.makeFourcc("vvc1");
+        assertEquals(VideoCodec.VVC.getFourcc(), fourcc);
     }
 
 }
