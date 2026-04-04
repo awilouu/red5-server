@@ -26,7 +26,7 @@ import org.apache.mina.core.buffer.IoBuffer;
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public class AV1Video extends AbstractVideo implements IEnhancedRTMPVideoCodec {
+public class AV1Video extends SimpleVideo implements IEnhancedRTMPVideoCodec {
 
     /*
        AV1CodecConfigurationRecord per AOM av1-isobmff spec:

@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public class MPEG1Video extends AbstractVideo {
+public class MPEG1Video extends SimpleVideo {
 
     private static Logger log = LoggerFactory.getLogger(MPEG1Video.class);
 

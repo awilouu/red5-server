@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author mondain
  */
-public class AbstractVideo implements IVideoStreamCodec {
+public class SimpleVideo implements IVideoStreamCodec {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -546,7 +546,7 @@ public class AbstractVideo implements IVideoStreamCodec {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        AbstractVideo other = (AbstractVideo) obj;
+        SimpleVideo other = (SimpleVideo) obj;
         if (codec != other.codec)
             return false;
         if (trackId != other.trackId)

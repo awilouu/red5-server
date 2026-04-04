@@ -19,7 +19,7 @@ import org.red5.io.IoConstants;
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public class SorensonVideo extends AbstractVideo {
+public class SorensonVideo extends SimpleVideo {
 
     /**
      * Sorenson video codec constant

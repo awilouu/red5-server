@@ -19,7 +19,7 @@ import org.red5.util.ByteNibbler;
  * @author Tiago Jacobs (tiago@imdt.com.br)
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public class AVCVideo extends AbstractVideo {
+public class AVCVideo extends SimpleVideo {
 
     /**
      * Video decoder configuration record to start the sequence. See ISO/IEC 14496-15, 5.2.4.1 for the description of

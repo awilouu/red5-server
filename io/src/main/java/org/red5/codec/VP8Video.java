@@ -19,7 +19,7 @@ import org.red5.util.ByteNibbler;
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public class VP8Video extends AbstractVideo {
+public class VP8Video extends SimpleVideo {
 
     /**
      * I bit from the X byte of the payload descriptor.

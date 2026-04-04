@@ -16,7 +16,7 @@ import org.apache.mina.core.buffer.IoBuffer;
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public class ScreenVideo2 extends AbstractVideo {
+public class ScreenVideo2 extends SimpleVideo {
 
     /**
      * FLV codec name constant

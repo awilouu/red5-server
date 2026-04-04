@@ -8,7 +8,7 @@
 package org.red5.server.stream;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.codec.AbstractVideo;
+import org.red5.codec.SimpleVideo;
 import org.red5.codec.IVideoStreamCodec;
 import org.red5.codec.VideoCodec;
 import org.red5.io.IoConstants;
@@ -53,7 +53,7 @@ public class VideoCodecFactory {
             boolean enhanced = ByteNibbler.isBitSet(c, 7);
             if (enhanced) {
                 log.debug("Enhanced codec handling; pos: {}", data.position());
-                AbstractVideo absv = new AbstractVideo();
+                SimpleVideo absv = new SimpleVideo();
                 absv.addData(data, 0);
                 codec = absv.getTrackCodec(0);
             } else {

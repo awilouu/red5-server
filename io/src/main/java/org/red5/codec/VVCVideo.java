@@ -19,7 +19,7 @@ import org.apache.mina.core.buffer.IoBuffer;
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public class VVCVideo extends AbstractVideo implements IEnhancedRTMPVideoCodec {
+public class VVCVideo extends SimpleVideo implements IEnhancedRTMPVideoCodec {
 
     /**
      * Video decoder configuration record to start the sequence. See ISO/IEC 14496-15:2024, 11.2.4.2 for the description of

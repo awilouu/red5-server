@@ -16,7 +16,7 @@ import org.apache.mina.core.buffer.IoBuffer;
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public class HEVCVideo extends AbstractVideo implements IEnhancedRTMPVideoCodec {
+public class HEVCVideo extends SimpleVideo implements IEnhancedRTMPVideoCodec {
 
     /**
      * Video decoder configuration record to start the sequence. See ISO/IEC 14496-15, 8.3.3.1.2 for the description of
