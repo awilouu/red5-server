@@ -188,8 +188,10 @@ public class OBUParser {
             seq.seqTier[0] = 0;
             seq.decoderModelPresentForThisOp[0] = false;
             seq.initialDisplayDelayPresentForThisOp[0] = false;
+            seq.frameIdNumbersPresentFlag = false;
         } else {
             seq.timingInfoPresentFlag = br.readBits(1) != 0;
+            seq.frameIdNumbersPresentFlag = br.readBits(1) != 0;
             if (seq.timingInfoPresentFlag) {
                 seq.timingInfo = new OBPSequenceHeader.TimingInfo();
                 seq.timingInfo.numUnitsInDisplayTick = br.readBits(32);
@@ -245,11 +247,6 @@ public class OBUParser {
         seq.maxFrameWidthMinus1 = (int) br.readBits(seq.frameWidthBitsMinus1 + 1);
         seq.maxFrameHeightMinus1 = (int) br.readBits(seq.frameHeightBitsMinus1 + 1);
 
-        if (seq.reducedStillPictureHeader) {
-            seq.frameIdNumbersPresentFlag = false;
-        } else {
-            seq.frameIdNumbersPresentFlag = br.readBits(1) != 0;
-        }
 
         if (seq.frameIdNumbersPresentFlag) {
             seq.deltaFrameIdLengthMinus2 = (byte) br.readBits(4);
