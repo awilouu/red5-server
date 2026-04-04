@@ -331,6 +331,33 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         }
     }
 
+    /** Returns the value playDecision takes depending on the IProviderServiceType and the type of play
+     * Play type determination
+     * https://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/NetStream.html#play()
+     * The start time, in seconds. Allowed values are -2, -1, 0, or a positive number.
+     * The default value is -2, which looks for a live stream, then a recorded stream,
+     * and if it finds neither, opens a live stream.
+     * If -1, plays only a live stream.
+     * If 0 or a positive number, plays a recorded stream, beginning start seconds in.
+     * -2: live then recorded, -1: live, >=0: recorded
+     * @param type the start time
+     * @param sourceType the ProviderServiceType
+     * @return an int representing the playDecision type
+     */
+    public int decidePlayDecision(int type, IProviderService.INPUT_TYPE sourceType){
+        int res = playDecision;
+
+        if (sourceType == IProviderService.INPUT_TYPE.LIVE && (type == -2 || type == -1 || type == 0)) {
+            res = 0;
+        } else if (sourceType == IProviderService.INPUT_TYPE.LIVE_WAIT && (type == -2 || type == -1)) {
+            res = 2;
+        } else if (sourceType == IProviderService.INPUT_TYPE.VOD) {
+            res = 1;
+        }
+        return res;
+    }
+
+
     /**
      * Play stream
      *
@@ -377,57 +404,20 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             default:
                 throw new IllegalStateException("Cannot play from non-stopped state");
         }
-        // Play type determination
-        // https://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/NetStream.html#play()
-        // The start time, in seconds. Allowed values are -2, -1, 0, or a positive number.
-        // The default value is -2, which looks for a live stream, then a recorded stream,
-        // and if it finds neither, opens a live stream.
-        // If -1, plays only a live stream.
-        // If 0 or a positive number, plays a recorded stream, beginning start seconds in.
-        //
-        // -2: live then recorded, -1: live, >=0: recorded
         int type = (int) (item.getStart() / 1000);
         log.debug("Type {}", type);
         // see if it's a published stream
         IScope thisScope = subscriberStream.getScope();
         final String itemName = item.getName();
+
         //check for input and type
         IProviderService.INPUT_TYPE sourceType = providerService.lookupProviderInput(thisScope, itemName, type);
         boolean sendNotifications = true;
-        // decision: 0 for Live, 1 for File, 2 for Wait, 3 for N/A
-        switch (type) {
-            case -2:
-                if (sourceType == IProviderService.INPUT_TYPE.LIVE) {
-                    playDecision = 0;
-                } else if (sourceType == IProviderService.INPUT_TYPE.VOD) {
-                    playDecision = 1;
-                } else if (sourceType == IProviderService.INPUT_TYPE.LIVE_WAIT) {
-                    playDecision = 2;
-                }
-                break;
-            case -1:
-                if (sourceType == IProviderService.INPUT_TYPE.LIVE) {
-                    playDecision = 0;
-                } else if (sourceType == IProviderService.INPUT_TYPE.LIVE_WAIT) {
-                    playDecision = 2;
-                }
-                break;
-            case 0://Gstreamer rtmp2src compatibility.
-                if (sourceType == IProviderService.INPUT_TYPE.LIVE) {
-                    playDecision = 0;
-                } else if (sourceType == IProviderService.INPUT_TYPE.VOD) {
-                    playDecision = 1;
-                }
-                break;
-            default:
-                if (sourceType == IProviderService.INPUT_TYPE.VOD) {
-                    playDecision = 1;
-                }
-                break;
-        }
+        playDecision = decidePlayDecision(type, sourceType);
         IMessage msg = null;
         currentItem.set(item);
         long itemLength = item.getLength();
+
         if (isDebug) {
             log.debug("Play decision is {} (0=Live, 1=File, 2=Wait, 3=N/A) item length: {}", playDecision, itemLength);
         }
