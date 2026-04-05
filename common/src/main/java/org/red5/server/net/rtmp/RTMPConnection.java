@@ -1844,36 +1844,6 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         return scheduler;
     }
 
-    /**
-     * <p>Setter for the field <code>executor</code>.</p>
-     *
-     * @param executor a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor} object
-     */
-    @Deprecated(forRemoval = true, since = "2.0.20")
-    public void setExecutor(ThreadPoolTaskExecutor executor) {
-        // XXX(paul) deprecating this in favor of a virtual thread executor
-    }
-
-    /**
-     * Thread pool for guarding deadlocks
-     *
-     * @return the deadlockGuardScheduler
-     */
-    @Deprecated(since = "1.3.29", forRemoval = true)
-    public ThreadPoolTaskScheduler getDeadlockGuardScheduler() {
-        return null;
-    }
-
-    /**
-     * Thread pool for guarding deadlocks
-     *
-     * @param deadlockGuardScheduler
-     *            the deadlockGuardScheduler to set
-     */
-    @Deprecated(since = "1.3.29", forRemoval = true)
-    public void setDeadlockGuardScheduler(ThreadPoolTaskScheduler deadlockGuardScheduler) {
-        // unused
-    }
 
     /**
      * Registers deferred result.
@@ -2093,17 +2063,6 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      */
     public void setReservedStreamsConcurrencyLevel(int reservedStreamsConcurrencyLevel) {
         this.reservedStreamsConcurrencyLevel = reservedStreamsConcurrencyLevel;
-    }
-
-    /**
-     * Specify the size of queue that will trigger audio packet dropping, disabled if it's 0
-     *
-     * @param executorQueueSizeToDropAudioPackets
-     *            queue size
-     */
-    @Deprecated(since = "1.3.29", forRemoval = true)
-    public void setExecutorQueueSizeToDropAudioPackets(Integer executorQueueSizeToDropAudioPackets) {
-        // unused
     }
 
     /** {@inheritDoc} */
