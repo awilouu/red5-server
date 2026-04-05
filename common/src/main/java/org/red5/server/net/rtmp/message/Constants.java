@@ -230,4 +230,5 @@ public interface Constants {
         TYPE_AGGREGATE, // 0x16 22 Aggregate data
     }
 
+
 }
