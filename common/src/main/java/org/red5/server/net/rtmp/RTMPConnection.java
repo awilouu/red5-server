@@ -618,26 +618,23 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      */
     @SuppressWarnings("null")
     private void startRoundTripMeasurement() {
-        if (scheduler != null) {
-            if (!pingInterval.isZero()) {
+        if (scheduler != null && !pingInterval.isZero() && isDebug) {
+            log.debug("startRoundTripMeasurement - {}", sessionId);
+
+            try {
+                // schedule with an initial delay of now + 2s to prevent ping messages during connect post processes
+                Instant delayUntilDate = Instant.now().plusMillis(2000L);
                 if (isDebug) {
-                    log.debug("startRoundTripMeasurement - {}", sessionId);
+                    log.debug("Keep alive delayed until: {}", delayUntilDate);
                 }
-                try {
-                    // schedule with an initial delay of now + 2s to prevent ping messages during connect post processes
-                    Instant delayUntilDate = Instant.now().plusMillis(2000L);
-                    if (isDebug) {
-                        log.debug("Keep alive delayed until: {}", delayUntilDate);
-                    }
-                    if (delayUntilDate != null) {
-                        keepAliveTask = scheduler.scheduleWithFixedDelay(new KeepAliveTask(), delayUntilDate, pingInterval);
-                    }
-                    if (isDebug) {
-                        log.debug("Keep alive scheduled for {}", sessionId);
-                    }
-                } catch (Exception e) {
-                    log.warn("Error creating keep alive job for {}", sessionId, e);
+                if (delayUntilDate != null) {
+                    keepAliveTask = scheduler.scheduleWithFixedDelay(new KeepAliveTask(), delayUntilDate, pingInterval);
                 }
+                if (isDebug) {
+                    log.debug("Keep alive scheduled for {}", sessionId);
+                }
+            } catch (Exception e) {
+                log.warn("Error creating keep alive job for {}", sessionId, e);
             }
         } else {
             // reducing from error to trace as its not all that important of a message these days to have such promotion
