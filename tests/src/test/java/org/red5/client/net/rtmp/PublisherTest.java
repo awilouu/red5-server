@@ -89,7 +89,7 @@ abstract class PublisherTest {
             // Try different paths for H.264 content
             File h264File = new File(userDir + "/tests/src/test/resources/fixtures", sourceMediaFile);
             if (!h264File.exists()) {
-                h264File = new File(userDir + "/io/src/test/resources/fixtures", sourceMediaFile);
+                h264File = new File(userDir + "/src/test/resources/fixtures", sourceMediaFile);
             }
             reader = new FLVReader(h264File);
         }
