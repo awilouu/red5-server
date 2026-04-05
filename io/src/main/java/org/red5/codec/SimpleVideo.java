@@ -82,6 +82,7 @@ public class SimpleVideo implements IVideoStreamCodec {
     // video codec specific attributes
     protected transient ConcurrentMap<String, String> attributes = new ConcurrentHashMap<>();
 
+    public static final int MAX_BIT_SIZE = 8;
     /** {@inheritDoc} */
     @Override
     public VideoCodec getCodec() {
@@ -136,9 +137,9 @@ public class SimpleVideo implements IVideoStreamCodec {
             // get the first byte
             byte flg = data.get();
             // determine if we've got an enhanced codec
-            enhanced = ByteNibbler.isBitSet(flg, 7); // network order so its rtl
+            enhanced = ByteNibbler.isBitSet(flg, MAX_BIT_SIZE-1); // network order so its rtl
             // for frame type we need get 3 bits
-            int ft = ((flg & 0b01110000) >> 4);
+            int ft = ((flg & 0b01110000) >> MAX_BIT_SIZE/2);
             frameType = VideoFrameType.valueOf(ft);
             // the codec id for enhanced is handled via addData
             if (enhanced) {
@@ -147,7 +148,7 @@ public class SimpleVideo implements IVideoStreamCodec {
                     result = true; //no fourCC on commands, and assuming canHandledata is not called with a command frame.
                 } else if (packetType == VideoPacketType.Multitrack) {
                     ByteNibbler nibbler = new ByteNibbler(data.get());
-                    multitrackType = AvMultitrackType.valueOf((byte) nibbler.nibble(4));
+                    multitrackType = AvMultitrackType.valueOf((byte) nibbler.nibble(MAX_BIT_SIZE/2));
                     if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
                         Integer fourcc = data.getInt();
                         result = (this.getCodec().getFourcc() == fourcc);
@@ -190,9 +191,9 @@ public class SimpleVideo implements IVideoStreamCodec {
             // get the first byte
             byte flg = data.get();
             // determine if we've got an enhanced codec
-            enhanced = ByteNibbler.isBitSet(flg, 7); // network order so its rtl
+            enhanced = ByteNibbler.isBitSet(flg, MAX_BIT_SIZE-1); // network order so its rtl
             // for frame type we need get 3 bits
-            int ft = ((flg & 0b01110000) >> 4);
+            int ft = ((flg & 0b01110000) >> MAX_BIT_SIZE/2);
             frameType = VideoFrameType.valueOf(ft);
             log.debug("Frame type: {}", frameType);
             if (enhanced) {
@@ -213,10 +214,10 @@ public class SimpleVideo implements IVideoStreamCodec {
                     multitrack = true;
                     // set up for reading more bits
                     ByteNibbler nibbler = new ByteNibbler(data.get());
-                    multitrackType = AvMultitrackType.valueOf((byte) nibbler.nibble(4));
+                    multitrackType = AvMultitrackType.valueOf((byte) nibbler.nibble(MAX_BIT_SIZE/2));
                     // Fetch VideoPacketType for all video tracks in the message
                     // This fetch MUST not result in a AudioPacketType.Multitrack
-                    packetType = VideoPacketType.valueOf(nibbler.nibble(4));
+                    packetType = VideoPacketType.valueOf(nibbler.nibble(MAX_BIT_SIZE/2));
                     if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with the same codec identified by the FOURCC
                         trackCodec = getTrackCodec(data);
@@ -237,18 +238,18 @@ public class SimpleVideo implements IVideoStreamCodec {
                         int modExDataSize = (data.get() & 0xff) + 1;
                         // If maximum 8-bit size (256), use 16-bit value instead
                         if (modExDataSize == 256) {
-                            modExDataSize = ((data.get() & 0xff) << 8 | (data.get() & 0xff)) + 1;
+                            modExDataSize = ((data.get() & 0xff) << MAX_BIT_SIZE | (data.get() & 0xff)) + 1;
                         }
                         // Read the ModEx data
                         byte[] modExData = new byte[modExDataSize];
                         data.get(modExData);
                         // Next byte: upper nibble = ModExType, lower nibble = updated PacketType
                         ByteNibbler modExNibbler = new ByteNibbler(data.get());
-                        VideoPacketModExType modExType = VideoPacketModExType.valueOf(modExNibbler.nibble(4));
-                        packetType = VideoPacketType.valueOf(modExNibbler.nibble(4));
+                        VideoPacketModExType modExType = VideoPacketModExType.valueOf(modExNibbler.nibble(MAX_BIT_SIZE/2));
+                        packetType = VideoPacketType.valueOf(modExNibbler.nibble(MAX_BIT_SIZE/2));
                         if (modExType == VideoPacketModExType.TimestampOffsetNano && modExData.length >= 3) {
                             // UI24 nanosecond offset within the current millisecond
-                            int nanoOffset = (modExData[0] & 0xff) << 16 | (modExData[1] & 0xff) << 8 | (modExData[2] & 0xff);
+                            int nanoOffset = (modExData[0] & 0xff) << MAX_BIT_SIZE*2 | (modExData[1] & 0xff) << MAX_BIT_SIZE | (modExData[2] & 0xff);
                             if (isTrace) {
                                 log.trace("ModEx TimestampOffsetNano: {} ns", nanoOffset);
                             }
@@ -283,7 +284,7 @@ public class SimpleVideo implements IVideoStreamCodec {
                             // located. You can use this value as an offset to locate the next video track in a multitrack system.
                             // The data pointer is positioned immediately after this field. Depending on the MultiTrack type, the
                             // offset points to either a 'fourCc' or a 'trackId.'
-                            trackSize = (data.get() & 0xff) << 16 | (data.get() & 0xff) << 8 | data.get() & 0xff;
+                            trackSize = (data.get() & 0xff) << MAX_BIT_SIZE*2 | (data.get() & 0xff) << MAX_BIT_SIZE | data.get() & 0xff;
                         }
                         // we're multitrack and multicodec so update track id
                         if (multitrackType == AvMultitrackType.ManyTracksManyCodecs && trackCodec != null) {
@@ -363,7 +364,7 @@ public class SimpleVideo implements IVideoStreamCodec {
             data.rewind();
         }
         if (!result && data != null && data.hasRemaining()) {
-            byte[] peek = new byte[Math.min(8, data.remaining())];
+            byte[] peek = new byte[Math.min(MAX_BIT_SIZE, data.remaining())];
             data.get(peek);
             data.rewind();
             log.warn("AbstractVideo rejected - codec: {} first bytes: {} enhanced: {} frameType: {} packetType: {} class: {}", codec, ByteNibbler.toHexString(peek), enhanced, frameType, packetType, getClass().getSimpleName());
